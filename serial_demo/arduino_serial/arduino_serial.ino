@@ -5,7 +5,10 @@
 
 // ---USED FOR LEDS---
 // pins for wemos d1 mini
-#define DATA 2  // D4
+// #define DATA 2  // D4
+// pins for ESP32
+#define DATA 16  // IO16
+
 
 #define WIDTH (32*2)
 #define HEIGHT 8
@@ -17,7 +20,7 @@ CRGB leds[NUM_LEDS];
 
 
 // ---USED FOR TIMING---
-int fps = 30;
+int fps = 50;
 int tickDuration = 1000/fps;
 long lastTickTime = 0;
 
@@ -49,10 +52,10 @@ void setup() {
 void loop() {
 	// READ IN NEW MESSAGES FROM SERIAL
 	if(Serial.available() > 0) {
-		leds[ getIndex(1, 0) ] = CRGB(128, 0, 0);
+		leds[ getIndex(63, 0) ] = CRGB(128, 0, 0);
 		FastLED.show();
 		message = Serial.readStringUntil('\n');
-		leds[ getIndex(1, 0) ] = CRGB(128, 128, 0);
+		leds[ getIndex(63, 0) ] = CRGB(128, 128, 0);
 		FastLED.show();
 		int love_length = message.length();
 		messageWidth = 0;
@@ -72,7 +75,7 @@ void loop() {
 			FastLED.clear();
 
 			if(messageWidth == 0) {
-				leds[ getIndex(1, 0) ] = CRGB(0, 128, 0);
+				leds[ getIndex(63, 0) ] = CRGB(0, 128, 0);
 				FastLED.show();
 			}
 
@@ -84,11 +87,13 @@ void loop() {
 				if(scroll < -messageWidth) {
 					scroll = WIDTH;
 
-					Serial.println("A");
-					leds[ getIndex(1, 0) ] = CRGB(128, 0, 128);
-					FastLED.show();
-					expectingNewMessage = true;
-					return;
+          if(message.length() >= 1 && message[message.length()-2] != ' ') {
+            Serial.println("A");
+            leds[ getIndex(63, 0) ] = CRGB(128, 0, 128);
+            FastLED.show();
+            expectingNewMessage = true;
+            return;
+          }
 				}
 			}
 
@@ -147,7 +152,7 @@ void loop() {
 
 			if (messageWidth == 0) {
 				messageWidth = x - scroll;
-				leds[ getIndex(1, 0) ] = CRGB(0, 128, 128);
+				leds[ getIndex(63, 0) ] = CRGB(0, 128, 128);
 			}
 
 			FastLED.show();
