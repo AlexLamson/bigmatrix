@@ -5,7 +5,7 @@ from serial import Serial
 import re
 from time import sleep
 import markovify
-import collections
+from collections.abc import Iterable
 
 enable_audio = False
 
@@ -28,7 +28,7 @@ args = [x.split() if ' ' in x else x for x in args]
 
 def flatten(l):
     for el in l:
-        if isinstance(el, collections.Iterable) and not isinstance(el, (str, bytes)):
+        if isinstance(el, Iterable) and not isinstance(el, (str, bytes)):
             yield from flatten(el)
         else:
             yield el
@@ -37,11 +37,12 @@ args = list(flatten(args))
 
 # figure out how long it should be shown
 duration = 0  # seconds
-if re.match('\d+(\.\d+)?s', args[0]) is not None:
-    duration = float(args[0][:-1])
-    args = args[1:]
 
 if len(args) >= 1:
+    if re.match(r'\d+(\.\d+)?s', args[0]) is not None:
+        duration = float(args[0][:-1])
+        args = args[1:]
+
     message = " ".join(args)+" "
 else:
 
@@ -70,7 +71,7 @@ else:
     for book in books:
         print("reading {}".format( book.replace("_", " ") ))
         # with open("orson_scott_card/"+book, encoding="ascii", errors='ignore') as f:
-        with open(book+".txt", encoding="ascii", errors='ignore') as f:
+        with open("books/"+book+".txt", encoding="ascii", errors='ignore') as f:
             book_text = f.read()
             book_text = "".join([x for x in book_text if x not in forbidden_chars])
         new_model = markovify.Text(book_text, state_size=state_size)
